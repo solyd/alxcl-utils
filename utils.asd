@@ -7,5 +7,7 @@
   :license "MIT"
   :depends-on (#:flexi-streams)
   :components ((:file "package")
-               (:file "bencoding")
+               (:file "utils")
+               (:file "bencoding"
+                      :depends-on ("package" "utils"))
                (:file "debug")))

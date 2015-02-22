@@ -4,12 +4,12 @@
 
 (define-condition invalid-dict-key (error)
   ((key :initarg :key
-        :accessor key)))
+        :reader key)))
 
 (defun dict->sorted-list (dict)
   (let ((result))
     (maphash (lambda (key val)
-               (if (stringp key)
+               (if (or (stringp key) (arrayp key))
                    (push (cons key val) result)
                    (error 'invalid-dict-key :key key)))
              dict)
@@ -24,12 +24,6 @@
 (defgeneric bencoding/encode-to-stream (item stream)
   (:documentation "Encodes: integer, string, list, dictionary, binary array"))
 
-(def-encode integer)
-(def-encode string)
-(def-encode array)
-(def-encode list)
-(def-encode hash-table)
-
 (defmacro def-encode (item-class)
   `(defmethod bencoding/encode ((item ,item-class))
      (bencoding/encode-to-stream item nil)))
@@ -42,6 +36,12 @@
   `(progn
      (def-encode-without-stream ,item-class)
      (defmethod bencoding/encode-to-stream ((,item-var ,item-class) ,stream-var) ,@body)))
+
+(def-encode integer)
+(def-encode string)
+(def-encode array)
+(def-encode list)
+(def-encode hash-table)
 
 (def-encode-to-stream (int integer stream)
   (write-sequence (string-to-octets (format nil "i~ae" int) :external-format +ascii+) stream))
@@ -69,3 +69,31 @@
 
 ;; Decoding
 ;; ================================================================================
+
+(define-condition invalid-bencoded-type (error)
+  ((octet :initarg :octet
+          :reader :octet)))
+
+(defgeneric bencoding/decode (input))
+
+(defmethod bencoding/decode ((stream stream))
+  (bencoding/decode (make-flexi-stream stream)))
+
+(defmethod bencoding/decode ((stream flexi-stream))
+  (let ((first-char (code-char (peek-byte stream))))
+    (case first-char
+      (#\i (decode-integer stream))
+      ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9) (decode-string stream))
+      (#\l (decode-list stream))
+      (#\d (decode-dict stream))
+      (t (error 'invalid-bencoded-type :octet first-char)))))
+
+(defun decode-integer (stream)
+  (read-expected-byte stream (char-code #\i))
+  (let* ((negative? (read-possible-byte stream (char-code #\-)))
+         (digits (read-ascii-digits stream))
+         (integer (parse-integer digits)))
+    (if (= integer 0)
+        (when (or negative? (> (length digits) 1))
+          (error "integer is zero but encoding is not i0ef"))
+      (when ))))
