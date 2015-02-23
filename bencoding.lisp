@@ -74,7 +74,18 @@
   ((octet :initarg :octet
           :reader :octet)))
 
+(define-condition invalid-bencoding (error)
+  ((message :initarg :message
+            :reader :message)))
+
 (defgeneric bencoding/decode (input))
+
+(defmethod bencoding/decode ((str string))
+  (bencoding/decode (make-in-memory-input-stream (string-to-octets str))))
+
+(defmethod bencoding/decode ((seq sequence))
+  (with-input-from-sequence (stream seq)
+    (bencoding/decode (make-flexi-stream stream :external-format :utf-8))))
 
 (defmethod bencoding/decode ((stream stream))
   (bencoding/decode (make-flexi-stream stream)))
@@ -83,17 +94,47 @@
   (let ((first-char (code-char (peek-byte stream))))
     (case first-char
       (#\i (decode-integer stream))
-      ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9) (decode-string stream))
+      ((#\0 #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9) (decode-array stream))
       (#\l (decode-list stream))
       (#\d (decode-dict stream))
       (t (error 'invalid-bencoded-type :octet first-char)))))
+
+(defun validate-integer (digits negative? integer)
+  (assert (or (and (= integer 0)
+                   (and (not negative?)
+                        (= (length digits) 1)))
+              (and (> integer 0)
+                   (not (char= (elt digits 0) #\0))))
+          (digits)
+          "Invalid bencoded integer: ~a" digits))
 
 (defun decode-integer (stream)
   (read-expected-byte stream (char-code #\i))
   (let* ((negative? (read-possible-byte stream (char-code #\-)))
          (digits (read-ascii-digits stream))
          (integer (parse-integer digits)))
-    (if (= integer 0)
-        (when (or negative? (> (length digits) 1))
-          (error "integer is zero but encoding is not i0ef"))
-      (when ))))
+    (validate-integer digits negative? integer)
+    (read-expected-byte stream (char-code #\e))
+    (if negative?
+        (- integer)
+        integer)))
+
+(defun decode-array (stream)
+  (let ((length (parse-integer (read-ascii-digits stream))))
+    (read-expected-byte stream (char-code #\:))
+    (read-octets stream length)))
+
+(defun decode-string (stream)
+  (octets-to-string (decode-array stream) :external-format :utf-8 ))
+
+(defun decode-list (stream)
+  (read-expected-byte stream (char-code #\l))
+  (loop until (read-byte-if-equals stream (char-code #\e)) collect (bencoding/decode stream)))
+
+(defun decode-dict (stream)
+  (read-expected-byte stream (char-code #\d))
+  (let ((result (make-hash-table :test 'equal)))
+    (loop until (read-byte-if-equals stream (char-code #\e)) do
+         (setf (gethash (decode-string stream) result)
+               (bencoding/decode stream)))
+    result))

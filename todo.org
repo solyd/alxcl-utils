@@ -1,0 +1,3 @@
+* TODO Add support for strings in encodings other than utf-8
+* TODO Enable control over what strings are decoded as binary arrays
+* TODO pretty formatting print (especially for hash tables)
