@@ -2,7 +2,9 @@
 
 (defpackage #:utils
   (:use #:cl)
-  (:export :hexdump)
+  (:export :hexdump
+           :bencoding/encode
+           :bencoding/decode)
 
   (:import-from #:flexi-streams
                 #:flexi-stream
