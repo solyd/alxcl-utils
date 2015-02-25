@@ -3,6 +3,8 @@
 (defpackage #:utils
   (:use #:cl)
   (:export :hexdump
+           :hexdump-to-stream
+           :log-hexdump
            :bencoding/encode
            :bencoding/decode)
 
