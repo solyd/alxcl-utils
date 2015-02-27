@@ -1,4 +1,4 @@
-(in-package :utils)
+(in-package :alxcl-utils)
 
 (defun hexdump-to-stream (stream seq &key (address-length 8) (address-offset 0))
   (labels ((x->char (x)
@@ -56,3 +56,16 @@
   `(log:debug "~a:~%~a" ,msg (hexdump ,seq
                                       :address-length ,address-length
                                       :address-offset ,address-offset)))
+
+
+;; TODO - make nested print
+(defun print-hash-table-entry (key value)
+  (format *standard-output* "~S: ~S~%" key value))
+
+(defun print-hash-table (hash-table)
+  (with-hash-table-iterator
+      (it hash-table)
+    (loop (multiple-value-bind (entry? key value) (it)
+            (if entry?
+                (print-hash-table-entry key value)
+                (return))))))

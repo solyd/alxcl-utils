@@ -1,12 +1,15 @@
-;;;; package.lisp
-
-(defpackage #:utils
+(defpackage #:alxcl-utils
   (:use #:cl)
+
   (:export :hexdump
            :hexdump-to-stream
            :log-hexdump
+
            :bencoding/encode
-           :bencoding/decode)
+           :bencoding/decode
+
+           :ipv4-vec->string
+           :endpoint-address)
 
   (:import-from #:flexi-streams
                 #:flexi-stream

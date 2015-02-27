@@ -1,4 +1,4 @@
-(in-package #:utils)
+(in-package #:alxcl-utils)
 
 (defparameter +ascii+ (make-external-format :ascii))
 

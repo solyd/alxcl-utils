@@ -1,4 +1,4 @@
-(in-package #:utils)
+(in-package #:alxcl-utils)
 
 (define-condition unexpected-byte (error)
   ((expected-byte :initarg :expected-byte
@@ -40,3 +40,14 @@ other char. Returns string with digits"
     (assert (= num num-read) (num)
             "Failed to read ~d octets (actualyread: ~d)" num num-read)
     result))
+
+(defun ipv4-vec->string (host-vec)
+  "Converts 4 byte vector to ipv4 string address"
+  (with-output-to-string (result)
+    (write-string (write-to-string (aref host-vec 0)) result)
+    (write-string "." result)
+    (write-string (write-to-string (aref host-vec 1)) result)
+    (write-string "." result)
+    (write-string (write-to-string (aref host-vec 2)) result)
+    (write-string "." result)
+    (write-string (write-to-string (aref host-vec 3)) result)))
