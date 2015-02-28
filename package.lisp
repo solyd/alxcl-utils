@@ -9,7 +9,15 @@
            :bencoding/decode
 
            :ipv4-vec->string
-           :endpoint-address)
+           :endpoint-address
+           :host
+           :port
+
+           :read-uint32
+           :read-octets
+           :iterate-pair
+           :with-gensyms
+           :ipv4-vec->endpoint-address)
 
   (:import-from #:flexi-streams
                 #:flexi-stream

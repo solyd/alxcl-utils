@@ -1,5 +1,12 @@
 (in-package #:alxcl-utils)
 
+(defmacro with-gensyms ((&rest names) &body body)
+  `(let ,(loop for n in names collect `(,n (gensym)))
+     ,@body))
+
+(defmacro iterate-pair ((first-var second-var list) &body body)
+  `(loop for (,first-var ,second-var) on ,list by #'cddr do ,@body))
+
 (define-condition unexpected-byte (error)
   ((expected-byte :initarg :expected-byte
                   :reader expected-byte)
@@ -41,13 +48,11 @@ other char. Returns string with digits"
             "Failed to read ~d octets (actualyread: ~d)" num num-read)
     result))
 
-(defun ipv4-vec->string (host-vec)
-  "Converts 4 byte vector to ipv4 string address"
-  (with-output-to-string (result)
-    (write-string (write-to-string (aref host-vec 0)) result)
-    (write-string "." result)
-    (write-string (write-to-string (aref host-vec 1)) result)
-    (write-string "." result)
-    (write-string (write-to-string (aref host-vec 2)) result)
-    (write-string "." result)
-    (write-string (write-to-string (aref host-vec 3)) result)))
+(defun octets->uint16 (octets)
+  (let ((result 0))
+    (setf (ldb (byte 8 0) result) (aref octets 1))
+    (setf (ldb (byte 8 8) result) (aref octets 0))
+    result))
+
+(defun read-uint16 (stream)
+  (octets->uint16 (read-octets stream 2)))
