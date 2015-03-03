@@ -1,5 +1,11 @@
 (in-package #:alxcl-utils)
 
+(defun make-binary-buffer (size)
+  (make-array size :element-type '(unsigned-byte 8)))
+
+(defmacro while (condition &body body)
+  `(loop :while ,condition :do ,@body))
+
 (defmacro with-gensyms ((&rest names) &body body)
   `(let ,(loop for n in names collect `(,n (gensym)))
      ,@body))
@@ -48,11 +54,5 @@ other char. Returns string with digits"
             "Failed to read ~d octets (actualyread: ~d)" num num-read)
     result))
 
-(defun octets->uint16 (octets)
-  (let ((result 0))
-    (setf (ldb (byte 8 0) result) (aref octets 1))
-    (setf (ldb (byte 8 8) result) (aref octets 0))
-    result))
-
-(defun read-uint16 (stream)
-  (octets->uint16 (read-octets stream 2)))
+(defun read-uint16 (stream &key (big-endian t))
+  (ironclad:octets-to-integer (read-octets stream 2) :big-endian big-endian))

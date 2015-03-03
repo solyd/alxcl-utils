@@ -72,11 +72,11 @@
 
 (define-condition invalid-bencoded-type (error)
   ((octet :initarg :octet
-          :reader :octet)))
+          :reader octet)))
 
 (define-condition invalid-bencoding (error)
   ((message :initarg :message
-            :reader :message)))
+            :reader message)))
 
 (defgeneric bencoding/decode (input))
 

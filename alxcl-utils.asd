@@ -5,6 +5,9 @@
   :license "MIT"
 
   :depends-on (#:flexi-streams
+               #:usocket
+               #:bordeaux-threads
+               #:ironclad
                #:log4cl)
 
   :components ((:file "package")

@@ -3,7 +3,6 @@
 
   (:export :hexdump
            :hexdump-to-stream
-           :log-hexdump
 
            :bencoding/encode
            :bencoding/decode
@@ -13,11 +12,18 @@
            :host
            :port
 
-           :read-uint32
+           :read-uint16
            :read-octets
            :iterate-pair
            :with-gensyms
-           :ipv4-vec->endpoint-address)
+           :ipv4-vec->endpoint-address
+           :tcp/read-data
+           :tcp/server
+           :socket-has-data?
+           :make-binary-buffer
+           :make-address
+           :while
+           :udp/send-receive)
 
   (:import-from #:flexi-streams
                 #:flexi-stream
