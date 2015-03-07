@@ -15,4 +15,5 @@
                (:file "network")
                (:file "bencoding"
                       :depends-on ("package" "utils"))
-               (:file "debug")))
+               (:file "debug")
+               (:file "collections")))

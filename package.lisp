@@ -23,7 +23,16 @@
            :make-binary-buffer
            :make-address
            :while
-           :udp/send-receive)
+           :udp/send-receive
+
+           :add-item
+           :remove-item
+           :get-items
+           :set-collection
+           :make-set-collection
+           :items-count
+           :add-items
+           :pop-item)
 
   (:import-from #:flexi-streams
                 #:flexi-stream
